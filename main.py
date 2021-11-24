@@ -1,9 +1,7 @@
-import typing as t
+import argparse
 import socket
 import threading
-import sys
-import argparse
-from collections import namedtuple
+import typing as t
 
 PlayerT = t.Union[t.Literal["X"], t.Literal["O"]]
 
@@ -61,7 +59,8 @@ class TicTacToe:
                 if self.check_valid_move(move):
                     self.send_move(
                         client, move
-                    )  # send move to opponent before making the move, because make the move might close the connection if you win
+                    )  # send move to opponent before making the move,
+                    # because makeing the move might close the connection if you win
                     self.make_move(move, self.you)
                     self.turn = self.opponent
                 else:
@@ -74,11 +73,12 @@ class TicTacToe:
                     self.make_move(data.decode("utf-8"), self.opponent)
                     self.turn = self.you
         client.close()  # close connection after there is as winner
+        return
 
     def make_move(self, move: str, player: PlayerT) -> t.Union[None, t.NoReturn]:
         """Assign a tile to the game board."""
         if self.game_over:
-            return
+            return None
         row, col = move.split(",")  # Move format "row,col"
         self.counter += 1
         self.board[int(row)][int(col)] = player
@@ -94,6 +94,7 @@ class TicTacToe:
         elif self.counter == 9:
             print("Tie!")
             exit()
+        return None
 
     def check_valid_move(self, move: str) -> bool:
         if "," in move:
@@ -158,7 +159,6 @@ class TicTacToe:
 
 if __name__ == "__main__":
 
-    ArgNamespace = namedtuple("ArgNamespace", ["connection", "host", "port"])
     parser = argparse.ArgumentParser()
     parser.add_argument("connection", nargs=1, help="'host' or 'connect'")
     parser.add_argument("--host", help="host to connect to", default="localhost")
