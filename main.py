@@ -2,7 +2,8 @@ import typing as t
 import socket
 import threading
 import sys
-
+import argparse
+from collections import namedtuple
 
 PlayerT = t.Union[t.Literal["X"], t.Literal["O"]]
 
@@ -156,17 +157,19 @@ class TicTacToe:
 
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        if sys.argv[1] == "host":  # python main.py host
-            game = TicTacToe()
-            game.host_game("localhost", 9999)
-        elif sys.argv[1] == "connect":  # python main.py connect
-            game = TicTacToe()
-            game.connect_to_game("localhost", 9999)
-        else:
-            print("Use the options 'host' or 'connect'")
-            exit()
+
+    ArgNamespace = namedtuple("ArgNamespace", ["connection", "host", "port"])
+    parser = argparse.ArgumentParser()
+    parser.add_argument("connection", nargs=1, help="'host' or 'connect'")
+    parser.add_argument("--host", help="host to connect to", default="localhost")
+    parser.add_argument("--port", help="port to connect to", default=9999, type=int)
+
+    args = parser.parse_args()
+
+    game = TicTacToe()
+    if "host" in args.connection:
+        game.host_game(args.host, args.port)
+    elif "connect" in args.connection:
+        game.connect_to_game(args.host, args.port)
     else:
-        print(
-            "Please provide an option to host or connect to a game\npython main.py host\npython main.py connect"
-        )
+        print("Invalid connection type. Try 'host' or 'connect'")
